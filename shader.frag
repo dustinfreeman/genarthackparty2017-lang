@@ -74,6 +74,7 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
     float blobby = 0.;
     float ital = 0.;
     ital = 1.; //default style is ital
+    
     if (0.3 < mouse.y && mouse.y < 0.7) {
         if (mouse.x > 0.6) {
             ital = 0.0; //formal
@@ -82,6 +83,19 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
             blobby = 1.0;
         }
     } 
+    
+    //settings for presentation
+    float present = mod(u_time, 30.)/30.;;
+    if (present < 0.25) {
+        ital = 0.; blobby = 0.;
+    } else if (present < 0.5) {
+        ital = 1.; blobby = 0.;
+	} else if (present < 0.75) {
+        ital = 0.; blobby = 1.;
+	} else {
+        ital = 1.; blobby = 1.;
+    }
+
     if (ital > 0.5) {
         float ext = distance(pt.xy, pos.xy);
         ext = 0.5*(1. - ext);
@@ -220,7 +234,7 @@ float distanceField(vec3 pt) {
     float word_length = 8. + floor(4.*rand(word_seed));
     float word_letter = floor(mod(u_time, word_dur)/letter_dur);
     float word_letter_prog = mod(u_time, letter_dur)/letter_dur;
-    if (mouse.y < 0.3)
+    // if (mouse.y < 0.3)
     {
     	float letter_index1 = 50.;
         if (word_letter < word_length) {

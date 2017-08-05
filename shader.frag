@@ -86,16 +86,25 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
 float distanceField(vec3 pt) {
     const float text_depth = -8.;// + mod(u_time, 1.);
     
-    float ticker = -2.*mod(u_time, 10.) + 4.;
-	//uncomment to stop word motion.
-    //ticker = -2.;
-    
+    float d = 1000000000000.;
+    const float num_letters_row_0 = 8.;
+    const float num_letters_row_1 = 10.;
     float letter_gap = 1.1;
     
-    float d = 1000000000000.;
-    const float num_letters = 6.;
-    for (float i = 0.; i < num_letters; i++) {
-    	d = gen_letter(d, pt, vec3(ticker + i*letter_gap, 0., text_depth), i);
+    float ticker_rate = u_time*1.;
+    float ticker = -1.*mod(ticker_rate, 10. + num_letters_row_0) + 4.;
+	//uncomment to stop word motion.
+    //ticker = -2.;
+    for (float i = 0.; i < num_letters_row_0; i++) {
+    	d = gen_letter(d, pt, 
+        	vec3(ticker + i*letter_gap, 0., text_depth), i);
+    }
+    
+    float ticker_row_1 = -1.*mod(ticker_rate*1.5, 10. + num_letters_row_1) + 4.;
+    for (float i = 0.; i < num_letters_row_1; i++) {
+    	d = gen_letter(d, pt, 
+            vec3(ticker_row_1 + i*letter_gap, -letter_gap, text_depth), 
+                       i + num_letters_row_0);
     }
     
     return d;
@@ -133,13 +142,13 @@ void main() {
     starry_background(st);
     
     //raycast:
-    const vec3 rayOrigin = vec3 (0.,0.,1.);
+    const vec3 rayOrigin = vec3 (0.,0.,1.0);
     vec3 rayDirection = normalize(vec3(st, 0.) - rayOrigin);
     
     float distance;
     float photonPosition = 1.;
     const float stepScale = 1.0;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 5; i++) {
         distance = distanceField(rayOrigin + rayDirection * photonPosition);
     	photonPosition += distance * stepScale;
         if (distance < 0.01) break;

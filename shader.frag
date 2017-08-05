@@ -31,6 +31,11 @@ float torusDF( vec3 p, vec2 t )
   return length(q)-t.y;
 }
 
+float smin(float a, float b, float k) {
+    float res = exp(-k*a) + exp(-k*b);
+    return -log(res)/k;
+}
+
 highp float rand(vec2 co)
 {
     const highp float a = 12.9898;
@@ -68,24 +73,25 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
         vec2 end =   vec2(floor(rand(index + stroke_index + 2.) * 3.)/3., 
                           floor(rand(index + stroke_index + 3.) * 3.)/3.);
         
-    	d = min(d, capsuleDF(pt, 
+    	d = smin(d, capsuleDF(pt, 
     		vec3(start + pos.xy, pos.z),
     		vec3(end + pos.xy, pos.z),
     		thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
-    		));
+    		), 40.);
         
         stroke_index += 1.;
         if (stroke_index > num_strokes) break;
     }
         
     const float sQuant = 4.;
-    d = min(d, sphereDF(pt, 
+    d = smin(d, sphereDF(pt, 
                        vec3(vec2(floor(sQuant*rand(index))/sQuant,
                                  floor(sQuant*rand(index))/sQuant) + 
                                  pos.xy, pos.z),
                        2.5* (thin_stroke + 
                             thicc_stroke*floor(rand(index) * 2.))
-                        ));
+                        ), 10.1); 
+    //can't get sphere smin over 10.2 or culling bug appears HARD
     
     return d;
 }
@@ -129,7 +135,7 @@ float distanceField(vec3 pt) {
     //moving rows:
     float rate = u_time*1.0;
     float ticker_row_0 = -1.*mod(rate, 2.*num_letters_row_0 + 1.) + 4.;
-	
+	//ticker_row_0 = -3.;
     // d = gen_letter(d, pt, vec3(-4., 0., text_depth), 0.);
     // d = gen_letter(d, pt, vec3(0., 0., text_depth), 0.);
 
@@ -197,8 +203,8 @@ void main() {
     
     float distance;
     float photonPosition = 1.;
-    float stepScale = 1. + 0.003*sin(u_time);
-    for (int i = 0; i < 6; i++) {
+    float stepScale = 1. + 0.001*sin(u_time);
+    for (int i = 0; i < 5; i++) {
         distance = distanceField(rayOrigin + rayDirection * photonPosition);
     	photonPosition += distance * stepScale;
         if (distance < 0.01) break;

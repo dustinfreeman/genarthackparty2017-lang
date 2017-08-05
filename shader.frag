@@ -91,7 +91,7 @@ float distanceField(vec3 pt) {
     const float num_letters_row_1 = 10.;
     float letter_gap = 1.1;
     
-    float ticker_rate = u_time*1.;
+    float ticker_rate = u_time*0.2;
     float ticker = -1.*mod(ticker_rate, 10. + num_letters_row_0) + 4.;
 	//uncomment to stop word motion.
     //ticker = -2.;
@@ -154,12 +154,15 @@ void main() {
         if (distance < 0.01) break;
     }
 
+    vec3 intersectionNormal = calculateNormal(rayOrigin + rayDirection * photonPosition);
+
  	if (distance < 0.01) {
-		vec3 intersectionNormal = calculateNormal(rayOrigin + rayDirection * photonPosition);
+		gl_FragColor = gl_FragColor + vec4(vec2(intersectionNormal)*0.3, 0., 0.);
+    } else {
         
         //rotate vector:
         vec3 inRot = rotateVec(intersectionNormal, u_time);
-            
+         
         float magentaFactor = inRot.x * 0.5 + 0.5;
         float blueFactor = inRot.y * 0.5 + 0.5;
 

@@ -125,6 +125,7 @@ float distanceField(vec3 pt) {
     const float num_letters_row_0 = 8.;
     const float num_letters_row_1 = 10.;
     const float num_letters_row_2 = 14.;
+    const float num_letters = 32.;
     
     
     vec2 mouse = u_mouse/u_resolution;
@@ -156,26 +157,36 @@ float distanceField(vec3 pt) {
 
     //uncomment to stop word motion.
     //ticker = -2.;
-    for (float i = 0.; i < num_letters_row_0; i++) {
+    for (float i = 0.; i < 8.; i++) {
+        float letter_index = mod(i + floor(rate/letter_gap), 
+                                 num_letters);
     	d = gen_letter(d, pt, 
-        	vec3(ticker_row_0 + i*letter_gap, 
-                 0., text_depth), i);
+        		vec3(-4. - mod(rate, letter_gap) + i*letter_gap, 
+                 0., text_depth), 
+    		letter_index);
     }
     
-    float ticker_row_1 = -1.*mod(rate*1.5,  2.*num_letters_row_1) + 4.;
-    //ticker_row_1 = -2.;
-    for (float i = 0.; i < num_letters_row_1; i++) {
-    	d = gen_letter(d, pt, 
-            vec3(ticker_row_1 + i*letter_gap, -row_gap, text_depth), 
-                       i + num_letters_row_0);
-    }
-    
-    float ticker_row_2 = -1.*mod(rate*2.,  2.*num_letters_row_2) + 4.;
-    //ticker_row_1 = -2.;
-    for (float i = 0.; i < num_letters_row_2; i++) {
-    	d = gen_letter(d, pt, 
-            vec3(ticker_row_2 + i*letter_gap, -2.*row_gap, text_depth), 
-                       i + num_letters_row_0 + num_letters_row_1);
+    //transitioning between letters
+    const float trans_dur = 1.;
+    float trans_seed = floor(u_time/trans_dur);
+    float trans_prog = mod(u_time, trans_dur)/trans_dur;
+    for (float i = 0.; i < 6.; i++) {
+    	float letter_index1 = floor(num_letters * rand(trans_seed+i));
+        // float letter_index1 = floor(u_time/trans_dur);
+        float d1 = gen_letter(d, pt, 
+        		vec3(-3. + i*letter_gap, 
+                 -row_gap, text_depth), 
+    		letter_index1);
+        
+        float letter_index2 = floor(num_letters * rand(trans_seed+i+1.));
+        // float letter_index2 = floor(u_time/trans_dur) + 1.;
+        float d2 = gen_letter(d, pt, 
+        		vec3(-3. + i*letter_gap, 
+                 -row_gap, text_depth), 
+    		letter_index2);
+        
+        float prog = cos(trans_prog * 3.14/2.0);
+        d = prog*d1 + (1.-prog)*d2;
     }
     
     return d;
@@ -229,7 +240,7 @@ void main() {
                         rayDirection * photonPosition);
 
     //rotate vector:
-    vec3 inRot = rotateVec(intersectionNormal, u_time*0.1);
+    vec3 inRot = rotateVec(intersectionNormal, u_time*0.3);
         
  	if (distance < 0.01) {
 		gl_FragColor += vec4(vec2(inRot)*0.5, 0.1, 0.);

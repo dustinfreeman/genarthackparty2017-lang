@@ -50,20 +50,27 @@ highp float rand(float f)
 }
 
 float gen_letter(float d, vec3 pt, vec3 pos, float index) {
-    const float thin_stroke = 0.03;
+    const float thin_stroke = 0.02;
     const float thicc_stroke = 0.06;
     
-    for (float stroke_index = 0.; stroke_index < 3.; stroke_index += 1.) {
-    
-    d = min(d, capsuleDF(pt, 
-                        vec3(vec2(0,stroke_index/2.) + pos.xy, pos.z),
-                         vec3(vec2(1,stroke_index/2.) + pos.xy, pos.z),
+    float num_strokes = 1. + floor(rand(index) * 3.);
+    float stroke_index = 0.;
+    for (int i = 0; i < 5; i++) {
+        vec2 start = vec2(floor(rand(index + stroke_index + 0.) * 3.)/3., 
+                          floor(rand(index + stroke_index + 1.) * 3.)/3.);
+        vec2 end =   vec2(floor(rand(index + stroke_index + 2.) * 3.)/3., 
+                          floor(rand(index + stroke_index + 3.) * 3.)/3.);
+        
+    	d = min(d, capsuleDF(pt, 
+                         vec3(start + pos.xy, pos.z),
+                         vec3(end + pos.xy, pos.z),
                          thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
                         ));
         
+        stroke_index += 1.;
+        if (stroke_index > num_strokes) break;
     }
-    
-    
+        
     const float sQuant = 4.;
     d = min(d, sphereDF(pt, 
                        vec3(vec2(floor(sQuant*rand(index))/sQuant,
@@ -83,10 +90,10 @@ float distanceField(vec3 pt) {
 	//uncomment to stop word motion.
     //ticker = -2.;
     
-    float letter_gap = 1.5;
+    float letter_gap = 1.1;
     
     float d = 1000000000000.;
-    const float num_letters = 4.;
+    const float num_letters = 6.;
     for (float i = 0.; i < num_letters; i++) {
     	d = gen_letter(d, pt, vec3(ticker + i*letter_gap, 0., text_depth), i);
     }

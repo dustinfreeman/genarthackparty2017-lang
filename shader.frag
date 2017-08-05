@@ -125,8 +125,8 @@ void main() {
     
     float distance;
     float photonPosition = 1.;
-    float stepScale = 0.4;
-    for (int i = 0; i < 256; i++) {
+    float stepScale = 1.0;
+    for (int i = 0; i < 100; i++) {
         distance = distanceField(rayOrigin + rayDirection * photonPosition);
     	photonPosition += distance * stepScale;
         if (distance < 0.01) break;

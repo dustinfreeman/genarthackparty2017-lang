@@ -67,7 +67,25 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
     
     vec2 mouse = u_mouse/u_resolution;
     float blobby = 0.;
-    if (mouse.y < 0.5 && mouse.x > 0.5) blobby = 1.;
+    float ital = 0.;
+    ital = 1.; //default style is ital
+    if (0.3 < mouse.y && mouse.y < 0.7) {
+        if (mouse.x > 0.6) {
+            ital = 0.0; //formal
+        } else if (mouse.x > 0.3) {
+            ital = 0.;
+            blobby = 1.0;
+        }
+    } 
+    if (ital > 0.5) {
+        float ext = distance(pt.xy, pos.xy);
+        ext = 0.5*(1. - ext);
+        //italiswirl
+        vec3 df = pt - pos;
+        df.x =  df.x*cos(ext) + df.y*sin(ext);
+        df.y = -df.x*sin(ext) + df.y*cos(ext);
+        pt = df + pos;
+    }
     
     float num_strokes = 1. + floor(rand(index) * 3.);
     float stroke_index = 0.;
@@ -115,7 +133,7 @@ float distanceField(vec3 pt) {
     float d = 100.;
     
     const float text_depth = -8.;// + mod(u_time, 1.);
-    const float letter_gap = 1.05;
+    const float letter_gap = 1.2;
     const float row_gap = 1.3;
     
     const float num_letters_row_p = 5.;
@@ -130,7 +148,7 @@ float distanceField(vec3 pt) {
     
     vec2 mouse = u_mouse/u_resolution;
     //show five characters, for presentation.
-    if (mouse.y > 0.5) {
+    if (mouse.y > 0.7) {
         for (float i = 0.; i < num_letters_row_p; i++) {
             
             float letter_test = mouse.x*(32. - num_letters_row_p);
@@ -167,7 +185,7 @@ float distanceField(vec3 pt) {
     }
     
     //transitioning between letters
-    const float trans_dur = 1.;
+    const float trans_dur = 2.;
     float trans_seed = floor(u_time/trans_dur);
     float trans_prog = mod(u_time, trans_dur)/trans_dur;
     for (float i = 0.; i < 6.; i++) {
@@ -243,7 +261,7 @@ void main() {
     vec3 inRot = rotateVec(intersectionNormal, u_time*0.3);
         
  	if (distance < 0.01) {
-		gl_FragColor += vec4(vec2(inRot)*0.5, 0.1, 0.);
+		gl_FragColor += vec4(vec2(inRot)*0.5 + 0.2, 0.3, 0.);
     } else if (distance < 10.) {
         float magentaFactor = inRot.x * 0.5 + 0.5;
         float blueFactor = inRot.y * 0.5 + 0.5;

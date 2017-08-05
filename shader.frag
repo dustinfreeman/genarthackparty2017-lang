@@ -62,10 +62,10 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
                           floor(rand(index + stroke_index + 3.) * 3.)/3.);
         
     	d = min(d, capsuleDF(pt, 
-                         vec3(start + pos.xy, pos.z),
-                         vec3(end + pos.xy, pos.z),
-                         thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
-                        ));
+    		vec3(start + pos.xy, pos.z),
+    		vec3(end + pos.xy, pos.z),
+    		thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
+    		));
         
         stroke_index += 1.;
         if (stroke_index > num_strokes) break;
@@ -142,27 +142,24 @@ void main() {
     starry_background(st);
     
     //raycast:
-    const vec3 rayOrigin = vec3 (0.,0.,1.0);
+    const vec3 rayOrigin = vec3 (0.,0.,1.5);
     vec3 rayDirection = normalize(vec3(st, 0.) - rayOrigin);
     
     float distance;
     float photonPosition = 1.;
-    const float stepScale = 1.0;
-    for (int i = 0; i < 5; i++) {
+    float stepScale = 1. + 0.01*sin(u_time);
+    for (int i = 0; i < 4; i++) {
         distance = distanceField(rayOrigin + rayDirection * photonPosition);
     	photonPosition += distance * stepScale;
         if (distance < 0.01) break;
     }
 
-    vec3 intersectionNormal = calculateNormal(rayOrigin + rayDirection * photonPosition);
+    vec3 intersectionNormal = calculateNormal(rayOrigin + 
+                        rayDirection * photonPosition);
 
  	if (distance < 0.01) {
-		gl_FragColor = gl_FragColor + vec4(vec2(intersectionNormal)*0.3, 0., 0.);
+		gl_FragColor += vec4(vec2(inRot)*0.4, 0., 0.);
     } else {
-        
-        //rotate vector:
-        vec3 inRot = rotateVec(intersectionNormal, u_time);
-         
         float magentaFactor = inRot.x * 0.5 + 0.5;
         float blueFactor = inRot.y * 0.5 + 0.5;
 
@@ -171,7 +168,4 @@ void main() {
         
         gl_FragColor = magentaFactor * magenta + blueFactor * blue;
     } 
-    // else {
-    //     gl_FragColor = vec4(0.1, 0.3, 0.4, 0.1);
-    // }
 }

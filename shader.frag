@@ -65,6 +65,11 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
          return d;
     }
     
+    if (index < 0. || index > 32.) {
+        //no letter, e.g. space
+        return d;
+    }
+    
     vec2 mouse = u_mouse/u_resolution;
     float blobby = 0.;
     float ital = 0.;
@@ -134,7 +139,7 @@ float distanceField(vec3 pt) {
     
     const float text_depth = -8.;// + mod(u_time, 1.);
     const float letter_gap = 1.2;
-    const float row_gap = 1.3;
+    const float row_gap = 1.2;
     
     const float num_letters_row_p = 5.;
     
@@ -207,6 +212,37 @@ float distanceField(vec3 pt) {
         d = prog*d1 + (1.-prog)*d2;
     }
     
+    
+    //words
+    const float word_dur = 3.;
+    const float letter_dur = 0.25;
+    float word_seed = floor(u_time/word_dur);
+    float word_length = 8. + floor(4.*rand(word_seed));
+    float word_letter = floor(mod(u_time, word_dur)/letter_dur);
+    float word_letter_prog = mod(u_time, letter_dur)/letter_dur;
+    if (mouse.y < 0.3)
+    {
+    	float letter_index1 = 50.;
+        if (word_letter < word_length) {
+            letter_index1 = rand(word_seed + word_letter);
+        }
+        // float letter_index1 = floor(u_time/trans_dur);
+        float d1 = gen_letter(d, pt, 
+        		vec3(-1., -2.5*row_gap, text_depth), 
+    		letter_index1);
+        
+        float letter_index2 = 50.;
+        if (word_letter + 1. < word_length) {
+            letter_index2 = rand(word_seed + word_letter + 1.);
+        }
+        // float letter_index2 = floor(u_time/trans_dur) + 1.;
+        float d2 = gen_letter(d, pt, 
+        		vec3(-1., -2.5*row_gap, text_depth), 
+    		letter_index2);
+        
+        float prog = cos(word_letter_prog * 3.14/2.0);
+        d = prog*d1 + (1.-prog)*d2;
+    }
     return d;
 }
 

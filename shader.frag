@@ -65,6 +65,10 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
          return d;
     }
     
+    vec2 mouse = u_mouse/u_resolution;
+    float blobby = 0.;
+    if (mouse.y < 0.5 && mouse.x > 0.5) blobby = 1.;
+    
     float num_strokes = 1. + floor(rand(index) * 3.);
     float stroke_index = 0.;
     for (int i = 0; i < 5; i++) {
@@ -73,24 +77,35 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
         vec2 end =   vec2(floor(rand(index + stroke_index + 2.) * 3.)/3., 
                           floor(rand(index + stroke_index + 3.) * 3.)/3.);
         
-    	d = smin(d, capsuleDF(pt, 
+        float newD = capsuleDF(pt, 
     		vec3(start + pos.xy, pos.z),
     		vec3(end + pos.xy, pos.z),
     		thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
-    		), 40.);
+    		);
+        
+        if (blobby > 0.5) {
+    		d = smin(d, newD , 40.);
+        } else {
+            d = min(d, newD);
+        }
         
         stroke_index += 1.;
         if (stroke_index > num_strokes) break;
     }
         
     const float sQuant = 4.;
-    d = smin(d, sphereDF(pt, 
+    float newD = sphereDF(pt, 
                        vec3(vec2(floor(sQuant*rand(index))/sQuant,
                                  floor(sQuant*rand(index))/sQuant) + 
                                  pos.xy, pos.z),
                        2.5* (thin_stroke + 
                             thicc_stroke*floor(rand(index) * 2.))
-                        ), 10.1); 
+                        );
+    if (blobby > 0.5) {
+    		d = smin(d, newD , 10.1);
+        } else {
+            d = min(d, newD);
+        }
     //can't get sphere smin over 10.2 or culling bug appears HARD
     
     return d;

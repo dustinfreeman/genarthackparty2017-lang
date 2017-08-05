@@ -31,9 +31,9 @@ float torusDF( vec3 p, vec2 t )
 
 highp float rand(vec2 co)
 {
-    highp float a = 12.9898;
-    highp float b = 78.233;
-    highp float c = 43758.5453;
+    const highp float a = 12.9898;
+    const highp float b = 78.233;
+    const highp float c = 43758.5453;
     highp float dt= dot(co.xy ,vec2(a,b));
     highp float sn= mod(dt,3.14);
     return fract(sin(sn) * c);
@@ -41,8 +41,8 @@ highp float rand(vec2 co)
 
 highp float rand(float f)
 {
-    highp float a = 12.9898;
-    highp float b = 78.233;
+    //highp float a = 12.9898;
+    //highp float b = 78.233;
     highp float c = 43758.5453;
     highp float dt = f;
     highp float sn= mod(dt,3.14);
@@ -50,44 +50,34 @@ highp float rand(float f)
 }
 
 float gen_letter(float d, vec3 pt, vec3 pos, float index) {
-    float stroke_index = 0.;
-    float thin_stroke = 0.03;
-    float thicc_stroke = 0.06;
+    const float thin_stroke = 0.03;
+    const float thicc_stroke = 0.06;
+    
+    for (float stroke_index = 0.; stroke_index < 3.; stroke_index += 1.) {
     
     d = min(d, capsuleDF(pt, 
-                        vec3(vec2(0,1.0) + pos.xy, pos.z),
-                         vec3(vec2(1,1.0) + pos.xy, pos.z),
+                        vec3(vec2(0,stroke_index/2.) + pos.xy, pos.z),
+                         vec3(vec2(1,stroke_index/2.) + pos.xy, pos.z),
                          thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
                         ));
+        
+    }
     
-    stroke_index += 1.;
-    d = min(d, capsuleDF(pt, 
-                        vec3(vec2(0,0.5) + pos.xy, pos.z),
-                         vec3(vec2(1,0.5) + pos.xy, pos.z),
-                         thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
-                        ));
     
-    stroke_index += 1.;
-    d = min(d, capsuleDF(pt, 
-                        vec3(vec2(0,0.) + pos.xy, pos.z),
-                         vec3(vec2(1,0.) + pos.xy, pos.z),
-                         thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
-                        ));
-    
-    float sQuant = 4.;
+    const float sQuant = 4.;
     d = min(d, sphereDF(pt, 
-                       vec3(vec2(floor(sQuant*rand(index+stroke_index))/sQuant,
-                                 floor(sQuant*rand(index+stroke_index))/sQuant) + 
+                       vec3(vec2(floor(sQuant*rand(index))/sQuant,
+                                 floor(sQuant*rand(index))/sQuant) + 
                                  pos.xy, pos.z),
                        2.5* (thin_stroke + 
-                            thicc_stroke*floor(rand(index + stroke_index) * 2.))
+                            thicc_stroke*floor(rand(index) * 2.))
                         ));
     
     return d;
 }
 
 float distanceField(vec3 pt) {
-    float text_depth = -8.;// + mod(u_time, 1.);
+    const float text_depth = -8.;// + mod(u_time, 1.);
     
     float ticker = -2.*mod(u_time, 10.) + 4.;
 	//uncomment to stop word motion.
@@ -136,12 +126,12 @@ void main() {
     starry_background(st);
     
     //raycast:
-    vec3 rayOrigin = vec3 (0.,0.,1.);
+    const vec3 rayOrigin = vec3 (0.,0.,1.);
     vec3 rayDirection = normalize(vec3(st, 0.) - rayOrigin);
     
     float distance;
     float photonPosition = 1.;
-    float stepScale = 1.0;
+    const float stepScale = 1.0;
     for (int i = 0; i < 100; i++) {
         distance = distanceField(rayOrigin + rayDirection * photonPosition);
     	photonPosition += distance * stepScale;
@@ -157,8 +147,8 @@ void main() {
         float magentaFactor = inRot.x * 0.5 + 0.5;
         float blueFactor = inRot.y * 0.5 + 0.5;
 
-        vec4 magenta = vec4(1., 0, 1., 1.);
-        vec4 blue = vec4(0., 0, 1., 1.);
+        const vec4 magenta = vec4(1., 0, 1., 1.);
+        const vec4 blue = vec4(0., 0, 1., 1.);
         
         gl_FragColor = magentaFactor * magenta + blueFactor * blue;
     } 

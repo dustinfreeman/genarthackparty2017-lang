@@ -43,25 +43,37 @@ highp float rand(float f)
 }
 
 float gen_letter(float d, vec3 pt, vec3 pos, float index) {
-    float stroke = 0.;
+    float stroke_index = 0.;
+    float thin_stroke = 0.03;
+    float thicc_stroke = 0.06;
+    
     d = min(d, capsuleDF(pt, 
-                        vec3(vec2(-0.600,1.0) + pos.xy, pos.z),
-                         vec3(vec2(0.920,1.0) + pos.xy, pos.z),
-                         0.05 + 0.1*floor(rand(index + stroke) * 2.)
+                        vec3(vec2(0,1.0) + pos.xy, pos.z),
+                         vec3(vec2(1,1.0) + pos.xy, pos.z),
+                         thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
                         ));
     
-    stroke += 1.;
+    stroke_index += 1.;
     d = min(d, capsuleDF(pt, 
-                        vec3(vec2(-0.600,0.5) + pos.xy, pos.z),
-                         vec3(vec2(0.920,0.5) + pos.xy, pos.z),
-                         0.05 + 0.1*floor(rand(index + stroke) * 2.)
+                        vec3(vec2(0,0.5) + pos.xy, pos.z),
+                         vec3(vec2(1,0.5) + pos.xy, pos.z),
+                         thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
                         ));
     
-    stroke += 1.;
+    stroke_index += 1.;
     d = min(d, capsuleDF(pt, 
-                        vec3(vec2(-0.600,0.) + pos.xy, pos.z),
-                         vec3(vec2(0.920,0.) + pos.xy, pos.z),
-                         0.05 + 0.1*floor(rand(index + stroke) * 2.)
+                        vec3(vec2(0,0.) + pos.xy, pos.z),
+                         vec3(vec2(1,0.) + pos.xy, pos.z),
+                         thin_stroke + thicc_stroke*floor(rand(index + stroke_index) * 2.)
+                        ));
+    
+    float sQuant = 4.;
+    d = min(d, sphereDF(pt, 
+                       vec3(vec2(floor(sQuant*rand(index+stroke_index))/sQuant,
+                                 floor(sQuant*rand(index+stroke_index))/sQuant) + 
+                                 pos.xy, pos.z),
+                       2.5* (thin_stroke + 
+                            thicc_stroke*floor(rand(index + stroke_index) * 2.))
                         ));
     
     return d;
@@ -71,19 +83,16 @@ float distanceField(vec3 pt) {
     float text_depth = -8.;// + mod(u_time, 1.);
     
     float ticker = -2.*mod(u_time, 10.) + 4.;
+	//uncomment to stop word motion.
+    //ticker = -2.;
     
-    float letter_gap = 2.;
+    float letter_gap = 1.5;
     
     float d = 1000000000000.;
-    float letter_index = 0.;
-    d = gen_letter(d, pt, vec3(ticker + letter_index, 0., text_depth), letter_index);
-    letter_index += letter_gap;
-    d = gen_letter(d, pt, vec3(ticker + letter_index, 0, text_depth), letter_index);
-    letter_index += letter_gap;
-    d = gen_letter(d, pt, vec3(ticker + letter_index, 0, text_depth), letter_index);
-    
-    // d = min(d, sphereDF(pt,
-                        // vec3(vec2(0, 0), text_depth), 0.3));
+    const float num_letters = 4.;
+    for (float i = 0.; i < num_letters; i++) {
+    	d = gen_letter(d, pt, vec3(ticker + i*letter_gap, 0., text_depth), i);
+    }
     
     return d;
 }

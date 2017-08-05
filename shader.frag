@@ -1,5 +1,6 @@
 // Author: Dustin Freeman
 // Title: GenLang
+// Code: https://github.com/dustinfreeman/genarthackparty2017-lang
 
 #ifdef GL_ES
 precision mediump float;

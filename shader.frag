@@ -19,6 +19,8 @@ float capsuleDF( vec3 p, vec3 a, vec3 b, float r )
 {
     vec3 pa = p - a, ba = b - a;
     float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+
+    //the call to length is the most costly in this entire thing.
     return length( pa - ba*h ) - r;
 }
 
@@ -52,6 +54,11 @@ highp float rand(float f)
 float gen_letter(float d, vec3 pt, vec3 pos, float index) {
     const float thin_stroke = 0.02;
     const float thicc_stroke = 0.06;
+    
+    //this is how we get good performance
+    if (distance(pt.xy, pos.xy) > 1.3) {
+         return d;
+    }
     
     float num_strokes = 1. + floor(rand(index) * 3.);
     float stroke_index = 0.;
@@ -91,7 +98,7 @@ float distanceField(vec3 pt) {
     const float num_letters_row_1 = 10.;
     float letter_gap = 1.1;
     
-    float ticker_rate = u_time*0.2;
+    float ticker_rate = u_time*0.4;
     float ticker = -1.*mod(ticker_rate, 10. + num_letters_row_0) + 4.;
 	//uncomment to stop word motion.
     //ticker = -2.;
@@ -101,6 +108,7 @@ float distanceField(vec3 pt) {
     }
     
     float ticker_row_1 = -1.*mod(ticker_rate*1.5, 10. + num_letters_row_1) + 4.;
+    //ticker_row_1 = -2.;
     for (float i = 0.; i < num_letters_row_1; i++) {
     	d = gen_letter(d, pt, 
             vec3(ticker_row_1 + i*letter_gap, -letter_gap, text_depth), 
@@ -147,7 +155,7 @@ void main() {
     
     float distance;
     float photonPosition = 1.;
-    float stepScale = 1. + 0.01*sin(u_time);
+    float stepScale = 1. + 0.003*sin(u_time);
     for (int i = 0; i < 4; i++) {
         distance = distanceField(rayOrigin + rayDirection * photonPosition);
     	photonPosition += distance * stepScale;
@@ -157,9 +165,12 @@ void main() {
     vec3 intersectionNormal = calculateNormal(rayOrigin + 
                         rayDirection * photonPosition);
 
+    //rotate vector:
+    vec3 inRot = rotateVec(intersectionNormal, u_time*0.1);
+        
  	if (distance < 0.01) {
-		gl_FragColor += vec4(vec2(inRot)*0.4, 0., 0.);
-    } else {
+		gl_FragColor += vec4(vec2(inRot)*0.5, 0.1, 0.);
+    } else if (distance < 10000.) {
         float magentaFactor = inRot.x * 0.5 + 0.5;
         float blueFactor = inRot.y * 0.5 + 0.5;
 

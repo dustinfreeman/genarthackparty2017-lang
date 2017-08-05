@@ -91,15 +91,16 @@ float gen_letter(float d, vec3 pt, vec3 pos, float index) {
 }
 
 float distanceField(vec3 pt) {
-    float d = 1000000000000.;
+    float d = 100.;
     
     const float text_depth = -8.;// + mod(u_time, 1.);
-    const float letter_gap = 1.1;
+    const float letter_gap = 1.05;
     const float row_gap = 1.3;
     
     const float num_letters_row_p = 5.;
     
     //There are 32 letters in the gen alphabet
+    //TODO: make 'em words
     const float num_letters_row_0 = 8.;
     const float num_letters_row_1 = 10.;
     const float num_letters_row_2 = 14.;
@@ -117,20 +118,27 @@ float distanceField(vec3 pt) {
             if (letter_index >= 32.) continue;
             
         	d = gen_letter(d, pt, 
-        		vec3(-num_letters_row_p/2. + i*letter_gap - fract(letter_test), 
+        		vec3(-num_letters_row_p/2. + i*letter_gap - 
+                     fract(letter_test), 
                      row_gap, text_depth), letter_index);
         }
     }
     
     
+    //edges of screen: -4 to 4
     //moving rows:
     float rate = u_time*1.0;
     float ticker_row_0 = -1.*mod(rate, 2.*num_letters_row_0 + 1.) + 4.;
-	//uncomment to stop word motion.
+	
+    // d = gen_letter(d, pt, vec3(-4., 0., text_depth), 0.);
+    // d = gen_letter(d, pt, vec3(0., 0., text_depth), 0.);
+
+    //uncomment to stop word motion.
     //ticker = -2.;
     for (float i = 0.; i < num_letters_row_0; i++) {
     	d = gen_letter(d, pt, 
-        	vec3(ticker_row_0 + i*letter_gap, 0., text_depth), i);
+        	vec3(ticker_row_0 + i*letter_gap, 
+                 0., text_depth), i);
     }
     
     float ticker_row_1 = -1.*mod(rate*1.5,  2.*num_letters_row_1) + 4.;
@@ -204,7 +212,7 @@ void main() {
         
  	if (distance < 0.01) {
 		gl_FragColor += vec4(vec2(inRot)*0.5, 0.1, 0.);
-    } else if (distance < 10000.) {
+    } else if (distance < 10.) {
         float magentaFactor = inRot.x * 0.5 + 0.5;
         float blueFactor = inRot.y * 0.5 + 0.5;
 

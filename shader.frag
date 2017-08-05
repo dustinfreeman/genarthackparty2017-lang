@@ -22,6 +22,13 @@ float capsuleDF( vec3 p, vec3 a, vec3 b, float r )
     return length( pa - ba*h ) - r;
 }
 
+//t.x = tube radius; t.y = tube fatness
+float torusDF( vec3 p, vec2 t )
+{
+  vec2 q = vec2(length(p.xz)-t.x,p.y);
+  return length(q)-t.y;
+}
+
 highp float rand(vec2 co)
 {
     highp float a = 12.9898;

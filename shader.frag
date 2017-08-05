@@ -179,7 +179,7 @@ float distanceField(vec3 pt) {
         	d = gen_letter(d, pt, 
         		vec3(-num_letters_row_p/2. + i*letter_gap - 
                      fract(letter_test), 
-                     row_gap, text_depth), letter_index);
+                     1.5*row_gap, text_depth), letter_index);
         }
     }
     
@@ -199,7 +199,7 @@ float distanceField(vec3 pt) {
                                  num_letters);
     	d = gen_letter(d, pt, 
         		vec3(-4. - mod(rate, letter_gap) + i*letter_gap, 
-                 0., text_depth), 
+                 .5*row_gap, text_depth), 
     		letter_index);
     }
     
@@ -212,14 +212,14 @@ float distanceField(vec3 pt) {
         // float letter_index1 = floor(u_time/trans_dur);
         float d1 = gen_letter(d, pt, 
         		vec3(-3. + i*letter_gap, 
-                 -row_gap, text_depth), 
+                 -.5*row_gap, text_depth), 
     		letter_index1);
         
         float letter_index2 = floor(num_letters * rand(trans_seed+i+1.));
         // float letter_index2 = floor(u_time/trans_dur) + 1.;
         float d2 = gen_letter(d, pt, 
         		vec3(-3. + i*letter_gap, 
-                 -row_gap, text_depth), 
+                 -.5*row_gap, text_depth), 
     		letter_index2);
         
         float prog = cos(trans_prog * 3.14/2.0);
@@ -242,7 +242,7 @@ float distanceField(vec3 pt) {
         }
         // float letter_index1 = floor(u_time/trans_dur);
         float d1 = gen_letter(d, pt, 
-        		vec3(-1., -2.5*row_gap, text_depth), 
+        		vec3(-1., -2.*row_gap, text_depth), 
     		letter_index1);
         
         float letter_index2 = 50.;
@@ -251,7 +251,7 @@ float distanceField(vec3 pt) {
         }
         // float letter_index2 = floor(u_time/trans_dur) + 1.;
         float d2 = gen_letter(d, pt, 
-        		vec3(-1., -2.5*row_gap, text_depth), 
+        		vec3(-1., -2.*row_gap, text_depth), 
     		letter_index2);
         
         float prog = cos(word_letter_prog * 3.14/2.0);

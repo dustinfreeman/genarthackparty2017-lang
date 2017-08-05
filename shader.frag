@@ -97,10 +97,32 @@ float distanceField(vec3 pt) {
     const float letter_gap = 1.1;
     const float row_gap = 1.3;
     
+    const float num_letters_row_p = 5.;
+    
+    //There are 32 letters in the gen alphabet
     const float num_letters_row_0 = 8.;
     const float num_letters_row_1 = 10.;
-    const float num_letters_row_2 = 15.;
+    const float num_letters_row_2 = 14.;
     
+    
+    vec2 mouse = u_mouse/u_resolution;
+    //show five characters, for presentation.
+    if (mouse.y > 0.5) {
+        for (float i = 0.; i < num_letters_row_p; i++) {
+            
+            float letter_index = i + 
+                floor(mouse.x*(32. - num_letters_row_p));
+            
+            if (letter_index >= 32.) continue;
+            
+        	d = gen_letter(d, pt, 
+        		vec3(-num_letters_row_p/2. + i*letter_gap, 
+                     row_gap, text_depth), letter_index);
+        }
+    }
+    
+    
+    //moving rows:
     float rate = u_time*1.0;
     float ticker_row_0 = -1.*mod(rate, 2.*num_letters_row_0 + 1.) + 4.;
 	//uncomment to stop word motion.
@@ -138,7 +160,7 @@ vec3 calculateNormal(vec3 pt) {
 }
 
 void starry_background(vec2 st) {
-	float r = rand(st + vec2(u_time*0.0000003, 0));
+    float r = rand(st + vec2(u_time*0.0000003, 0));
     if (r > 0.01) {
         gl_FragColor = vec4(0.,0.,0.,1.);
     } else {

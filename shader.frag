@@ -110,13 +110,14 @@ float distanceField(vec3 pt) {
     if (mouse.y > 0.5) {
         for (float i = 0.; i < num_letters_row_p; i++) {
             
+            float letter_test = mouse.x*(32. - num_letters_row_p);
             float letter_index = i + 
-                floor(mouse.x*(32. - num_letters_row_p));
+                floor(letter_test);
             
             if (letter_index >= 32.) continue;
             
         	d = gen_letter(d, pt, 
-        		vec3(-num_letters_row_p/2. + i*letter_gap, 
+        		vec3(-num_letters_row_p/2. + i*letter_gap - fract(letter_test), 
                      row_gap, text_depth), letter_index);
         }
     }
